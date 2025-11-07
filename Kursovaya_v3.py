@@ -42,7 +42,10 @@ class TextWrapper:
         self.text_field = text_field
 
     def write(self, text: str):
+        # Вывод в текстовое поле GUI
         self.text_field.insert(tk.END, text)
+        # Дублирование в консоль
+        print(text, end='')
 
     def flush(self):
         self.text_field.update()
@@ -99,28 +102,25 @@ class Page:
         self.listAge = []               # Возраст в виде списка 0 и 1
         #self.listAge.append(0)          # Добавляем начальное значение
         self.lenBuffer = LenBuffer      # Максимальная длина буфера (спсика возраста)
+        
+        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        for i in range(0, self.lenBuffer):
+            self.listAge.append(0)
+        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     # К странице не обратились на такте
     def skip_page(self):
-        #self.age = 0
-        #self.listAge.append(0)
-        self.listAge.append(0)
-        # Удаляем первый элемент, если буффер достиг предела
-        if(len(self.listAge) >= self.lenBuffer):
-            self.listAge.pop(0)
+        # Сдвиг всех битов вправо + добавление 0 в старший разряд
+        self.listAge.insert(0, 0)  # Добавляем 0 в начало (старший разряд)
+        if len(self.listAge) > self.lenBuffer:
+            self.listAge.pop()     # Удаляем из конца (младший разряд)
 
     # К странице обратились на такте
     def age_page(self):
-        
-        # Увеличиваем возраст
-        #self.age += 1
-        
-        # Увеличиваем отображаемый возраст
-        self.listAge.append(1)
-        
-        # Удаляем первый элемент, если буффер достиг предела
-        if(len(self.listAge) >= self.lenBuffer):
-            self.listAge.pop(0)
+        # Сдвиг всех битов вправо + добавление 1 в старший разряд
+        self.listAge.insert(0, 1)  # Добавляем 1 в начало (старший разряд)
+        if len(self.listAge) > self.lenBuffer:
+            self.listAge.pop()     # Удаляем из конца (младший разряд)
 
     
     # Вернуть список обращений в виде float
@@ -128,9 +128,10 @@ class Page:
         tempString = ""
         for i in range(0, len(self.listAge)):
             tempString += str(self.listAge[i])
-        if(len(tempString) == 0):
+        if len(tempString) == 0:
             tempString = "0"
-        return float(tempString)
+        # Преобразуем двоичную строку в десятичное число
+        return float(int(tempString, 2))
     
     # Вернуть список обращений в виде string
     def get_age_in_string(self):
